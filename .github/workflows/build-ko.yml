@@ -1,4 +1,4 @@
-name: Build RTL8812AU for A9 Kernel
+name: Build RTL8812AU for Kernel 4.4.205
 
 on:
   workflow_dispatch:
@@ -14,15 +14,24 @@ jobs:
       run: |
         git clone https://github.com/thongass000/android_kernel_samsung_a9y18qlte.git kernel
 
-    - name: Install dependencies
+    - name: Download Android NDK
       run: |
-        sudo apt update
-        sudo apt install -y build-essential bc kmod git flex bison libssl-dev
+        wget https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
+        unzip android-ndk-r21e-linux-x86_64.zip
+        echo "NDK downloaded"
+
+    - name: Set up environment
+      run: |
+        export NDK_HOME=$PWD/android-ndk-r21e
+        export PATH=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+        export CROSS_COMPILE=aarch64-linux-android-
+        export ARCH=arm64
+        export KERNEL_SRC=$PWD/kernel
 
     - name: Build module
       run: |
-        make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-          KERNEL_SRC=./kernel \
+        make ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- \
+          KERNEL_SRC=$PWD/kernel \
           CONFIG_PLATFORM_ARM64_ANDROID=y \
           CONFIG_PLATFORM_ANDROID=y
 
