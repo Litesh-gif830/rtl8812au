@@ -20,23 +20,21 @@ jobs:
         unzip android-ndk-r21e-linux-x86_64.zip
         echo "NDK downloaded"
 
-    - name: Set up environment
+    - name: Set environment variables
       run: |
-        export NDK_HOME=$PWD/android-ndk-r21e
-        export PATH=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+        echo "Setting up environment"
+        export NDK=$PWD/android-ndk-r21e
+        export PATH=$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
         export CROSS_COMPILE=aarch64-linux-android-
         export ARCH=arm64
         export KERNEL_SRC=$PWD/kernel
 
+    - name: Prepare kernel headers
+      run: |
+        cd kernel
+        make ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- a9y18qlte_defconfig
+        cd ..
+
     - name: Build module
       run: |
-        make ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- \
-          KERNEL_SRC=$PWD/kernel \
-          CONFIG_PLATFORM_ARM64_ANDROID=y \
-          CONFIG_PLATFORM_ANDROID=y
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: rtl8812au-ko
-        path: *.ko
+        make ARCH=arm64 CROSS
