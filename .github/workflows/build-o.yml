@@ -7,21 +7,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout driver
+    - name: Checkout RTL8812AU driver
       uses: actions/checkout@v3
 
-    - name: Clone kernel source
+    - name: Clone Samsung A9 kernel source
       run: |
         git clone https://github.com/thongass000/android_kernel_samsung_a9y18qlte.git kernel
 
-    - name: Download Android NDK
+    - name: Download Android NDK r21e
       run: |
         wget https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
         unzip android-ndk-r21e-linux-x86_64.zip
 
     - name: Set environment variables
       run: |
-        echo "Setting up environment"
         echo "NDK=$PWD/android-ndk-r21e" >> $GITHUB_ENV
         echo "PATH=$PWD/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" >> $GITHUB_ENV
         echo "CROSS_COMPILE=aarch64-linux-android-" >> $GITHUB_ENV
@@ -36,14 +35,14 @@ jobs:
         make ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- modules_prepare
         cd ..
 
-    - name: Build module
+    - name: Build RTL8812AU module
       run: |
         make ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- \
           KERNEL_SRC=$PWD/kernel \
           CONFIG_PLATFORM_ARM64_ANDROID=y \
           CONFIG_PLATFORM_ANDROID=y
 
-    - name: Upload artifact
+    - name: Upload compiled module
       uses: actions/upload-artifact@v3
       with:
         name: rtl8812au-ko
